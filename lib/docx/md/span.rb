@@ -8,6 +8,11 @@ module DOCX
 			end
 			
 			def to_s
+				if @run.is_a?(XML::Hyperlink)
+					
+					return "[#{@run.runs.map { |run| Span.new(run, @relations) }.join('')}][#{@run.rel_id}]"
+				end
+				
 				if @run.is_image?
 					
 					if @relations.nil?
@@ -24,6 +29,11 @@ module DOCX
 				end
 				
 				text = @run.text
+				text.gsub!('[', '\[')
+				text.gsub!(']', '\]')
+				text.gsub!('<', '\<')
+				text.gsub!('>', '\>')
+				text.gsub!('#', '\#')
 				text.gsub!("\n","  \n")
 				
 				if @run.italics

@@ -12,6 +12,14 @@ module DOCX
 			doc = XML::Document.new(self)
 			parser = Nokogiri::XML::SAX::Parser.new(doc, "UTF-8")
 			parser.parse(file)
+			
+			@outfile.print "\n"
+			@outfile.print "\n"
+			@outfile.print "\n"
+
+			relations.links.each do |link|
+				@outfile.print "[#{link[:id]}]: #{link[:target]}\n"
+			end
 		end
 		
 		def parsed(paragraph)

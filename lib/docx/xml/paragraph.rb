@@ -7,6 +7,7 @@ module DOCX
 			def initialize(attrs)
 				@runs = []
 				@run = nil
+				@hyperlink = nil
 				@in_ppr = false
 				@paragraph_properties = ParagraphProperties.new
 			end
@@ -86,6 +87,11 @@ module DOCX
 					@run.start_element_namespace(name, attrs, prefix, uri, ns)
 					return
 				end
+				
+				if @hyperlink
+					@hyperlink.start_element_namespace(name, attrs, prefix, uri, ns)
+					return
+				end
 
 				if uri != XML::DOC_NS
 					return
@@ -98,6 +104,10 @@ module DOCX
 					puts 'NEW RUN'
 					@run = Run.new
 					add_run(@run)
+				when 'hyperlink'
+					puts 'NEW HYPERLINK'
+					@hyperlink = Hyperlink.new(attrs)
+					add_run(@hyperlink)
 				else
 					puts "P>>> #{name} #{attrs.inspect} #{prefix} #{uri} #{ns.inspect}"
 				end
@@ -124,6 +134,16 @@ module DOCX
 					@run.end_element_namespace(name, prefix, uri)
 					return
 				end
+				
+				if @hyperlink
+					if (name == 'hyperlink') && (uri == XML::DOC_NS)
+						@hyperlink = nil
+						return
+					end
+
+					@hyperlink.end_element_namespace(name, prefix, uri)
+					return
+				end
 			
 				if uri != XML::DOC_NS
 					return
@@ -135,6 +155,8 @@ module DOCX
 			def characters(string)
 				if @run
 					@run.characters(string)
+				elsif @hyperlink
+					@hyperlink.characters(string)
 				end
 			end
 		
