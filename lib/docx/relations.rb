@@ -29,5 +29,15 @@ module DOCX
 			relations.select { |rel| rel[:type] == 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink' }
 		end
 		
+		def get_target(id)
+			relation = @relations.select { |rel| rel[:id] == id }.first
+			
+			if !relation
+				return nil
+			end
+			
+			relation[:target]
+		end
+		
 	end
 end

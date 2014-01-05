@@ -56,7 +56,7 @@ module DOCX
 
 			file = @archive.get('word/document.xml')
 			outfile = File.open('output.md', 'w')
-			document = Document.new(file, outfile)
+			document = Document.new(file, outfile, @relations)
 			outfile.close
 			file.close
 			

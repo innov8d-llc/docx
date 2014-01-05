@@ -54,6 +54,14 @@ module DOCX
 				@paragraph_properties.num_properties.indent_level
 			end
 			
+			def is_code?
+				if style.nil?
+					return false
+				end
+				
+				(style == "Program") || (style == "Code")
+			end
+			
 			def runs
 				@runs
 			end
@@ -61,10 +69,6 @@ module DOCX
 			# actions
 
 			def start_element_namespace(name, attrs = [], prefix = nil, uri = nil, ns = [])
-				if uri != XML::DOC_NS
-					return
-				end
-				
 				if @in_ppr
 					@paragraph_properties.start_element_namespace(name, attrs, prefix, uri, ns)
 					return
@@ -72,6 +76,10 @@ module DOCX
 				
 				if @run
 					@run.start_element_namespace(name, attrs, prefix, uri, ns)
+					return
+				end
+
+				if uri != XML::DOC_NS
 					return
 				end
 			
@@ -88,12 +96,9 @@ module DOCX
 			end
 		
 			def end_element_namespace(name, prefix = nil, uri = nil)
-				if uri != XML::DOC_NS
-					return
-				end
 				
 				if @in_ppr
-					if name == 'pPr'
+					if (name == 'pPr') && (uri == XML::DOC_NS)
 						@in_ppr = false
 						return
 					end
@@ -103,7 +108,7 @@ module DOCX
 				end
 				
 				if @run
-					if name == 'r'
+					if (name == 'r') && (uri == XML::DOC_NS)
 						@run = nil
 						return
 					end
@@ -112,6 +117,10 @@ module DOCX
 					return
 				end
 			
+				if uri != XML::DOC_NS
+					return
+				end
+
 				puts "P>>> /#{name} #{prefix} #{uri}"
 			end
 			

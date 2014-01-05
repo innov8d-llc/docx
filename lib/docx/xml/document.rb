@@ -20,12 +20,8 @@ module DOCX
 		
 			def start_element_namespace(name, attrs = [], prefix = nil, uri = nil, ns = [])
 			
-				if uri != XML::DOC_NS
-					return
-				end
-			
 				if !@in_body
-					if name == 'body'
+					if (name == 'body') && (uri == XML::DOC_NS)
 						@in_body = true
 					end
 				
@@ -34,6 +30,10 @@ module DOCX
 			
 				if @para
 					@para.start_element_namespace(name, attrs, prefix, uri, ns)
+					return
+				end
+			
+				if uri != XML::DOC_NS
 					return
 				end
 				
@@ -52,25 +52,25 @@ module DOCX
 				if !@in_body
 					return
 				end
-
-				if uri != XML::DOC_NS
-					return
-				end
 			
-				if name == 'body'
+				if (name == 'body') && (uri == XML::DOC_NS)
 					@in_body = false
 				
 					return
 				end
 				
 				if @para
-					if name == 'p'
+					if (name == 'p') && (uri == XML::DOC_NS)
 						@parent.parsed(@para)
 						@para = nil
 					else
 						@para.end_element_namespace(name, prefix, uri)
 					end
 					
+					return
+				end
+
+				if uri != XML::DOC_NS
 					return
 				end
 			
