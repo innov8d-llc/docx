@@ -16,6 +16,11 @@ module DOCX
 		
 		def parsed(paragraph)
 			output = nil
+
+			if paragraph.is_a?(XML::Table)
+				@outfile.print MD::Table.new(paragraph, @relations).to_s
+				return
+			end
 			
 			if @in_list && !paragraph.is_list?
 				@outfile.print "\n"
@@ -25,8 +30,13 @@ module DOCX
 				@outfile.print "\n"
 			end
 			
+			if @in_quote && !paragraph.is_quote?
+				@outfile.print "\n"
+			end
+			
 			@in_list = false
 			@in_code = false
+			@in_quote = false
 			
 			if paragraph.is_heading?
 				output = MD::Heading.new(paragraph)
@@ -36,6 +46,9 @@ module DOCX
 			elsif paragraph.is_code?
 				output = MD::Code.new(paragraph)
 				@in_code = true
+			elsif paragraph.is_quote?
+				output = MD::Quote.new(paragraph)
+				@in_quote = true
 			else
 				output = MD::Paragraph.new(paragraph, @relations)
 			end

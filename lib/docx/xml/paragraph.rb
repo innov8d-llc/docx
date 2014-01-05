@@ -62,6 +62,14 @@ module DOCX
 				(style == "Program") || (style == "Code")
 			end
 			
+			def is_quote?
+				if style.nil?
+					return false
+				end
+
+				style == "Quote"
+			end
+			
 			def runs
 				@runs
 			end

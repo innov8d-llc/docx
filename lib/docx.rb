@@ -4,6 +4,7 @@ require 'docx/relations'
 require 'docx/xml'
 require 'docx/md'
 require 'docx/document'
+require 'fileutils'
 
 module DOCX
 	def self.parse(filename)
@@ -17,6 +18,8 @@ module DOCX
 			
 			@relations = get_relations
 			@document = get_document
+			
+			extract_images
 		end
 		
 		# accessors
@@ -62,6 +65,20 @@ module DOCX
 			
 			document
 		end		
+		
+		def extract_images
+			images.each do |image|
+				target = image[:target]
+				puts "* Extracting #{target}"
+				dir = File.dirname(target)
+				FileUtils.mkdir_p(dir) unless File.exist?(dir)
+				file = @archive.get("word/#{target}")
+				File.open(target, 'wb') do |f|
+					f << file.read
+				end
+				file.close
+			end
+		end
 		
 	end
 	

@@ -11,11 +11,10 @@ module DOCX
 			
 			def initialize(parent)
 				@parent = parent
-			end
-				
-			def start_document
 				@in_body = false
 				@para = nil
+				@table = nil
+				@in_tbl = false
 			end
 		
 			def start_element_namespace(name, attrs = [], prefix = nil, uri = nil, ns = [])
@@ -32,6 +31,11 @@ module DOCX
 					@para.start_element_namespace(name, attrs, prefix, uri, ns)
 					return
 				end
+
+				if @in_tbl
+					@table.start_element_namespace(name, attrs, prefix, uri, ns)
+					return
+				end
 			
 				if uri != XML::DOC_NS
 					return
@@ -41,6 +45,9 @@ module DOCX
 				when 'p'
 					puts 'NEW PARA'
 					@para = Paragraph.new(attrs)
+				when 'tbl'
+					@table = Table.new
+					@in_tbl = true
 				else
 					puts ">>> #{name} #{attrs.inspect} #{prefix} #{uri} #{ns.inspect}"
 				end
@@ -69,6 +76,18 @@ module DOCX
 					
 					return
 				end
+				
+				if @in_tbl
+					if (name == 'tbl') && (uri == XML::DOC_NS)
+						@parent.parsed(@table)
+						@in_tbl = false
+						@table = nil
+						return
+					end
+					
+					@table.end_element_namespace(name, prefix, uri)
+					return
+				end
 
 				if uri != XML::DOC_NS
 					return
@@ -81,6 +100,8 @@ module DOCX
 			def characters(string)
 				if @para
 					@para.characters(string)
+				elsif @table
+					@table.characters(string)
 				end
 			end
 		
